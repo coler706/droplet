@@ -1667,7 +1667,7 @@ ace.define("ace/mode/coffee_highlight_rules",["require","exports","module","ace/
         this.normalizeRules();
     }
 
-    exports.CoffeeHighlightRules = CoffeeHighlightRules;
+    exportsHighlightRules = CoffeeHighlightRules;
 });
 
 ace.define("ace/mode/jade_highlight_rules",["require","exports","module","ace/lib/oop","ace/mode/text_highlight_rules","ace/mode/markdown_highlight_rules","ace/mode/scss_highlight_rules","ace/mode/less_highlight_rules","ace/mode/coffee_highlight_rules","ace/mode/javascript_highlight_rules"], function(require, exports, module) {
@@ -1678,7 +1678,7 @@ var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 var MarkdownHighlightRules = require("./markdown_highlight_rules").MarkdownHighlightRules;
 var SassHighlightRules = require("./scss_highlight_rules").ScssHighlightRules;
 var LessHighlightRules = require("./less_highlight_rules").LessHighlightRules;
-var CoffeeHighlightRules = require("./coffee_highlight_rules").CoffeeHighlightRules;
+var CoffeeHighlightRules = require("./coffee_highlight_rules")HighlightRules;
 var JavaScriptHighlightRules = require("./javascript_highlight_rules").JavaScriptHighlightRules;
 
 function mixin_embed(tag, prefix) {

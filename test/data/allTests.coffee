@@ -1643,25 +1643,25 @@ test "#3132: Format jsdoc-style block-comment nicely", ->
   input = """
   ###*
   # Multiline for jsdoc-"@doctags"
-  # 
+  #
   # @type {Function}
   ###
   fn = () -> 1
   """
 
   result = """
-  
+
   /**
    * Multiline for jsdoc-"@doctags"
-   * 
+   *
    * @type {Function}
    */
   var fn;
-  
+
   fn = function() {
     return 1;
   };
-  
+
   """
   eq CoffeeScript.compile(input, bare: on), result
 
@@ -1671,25 +1671,25 @@ test "#3132: Format hand-made (raw) jsdoc-style block-comment nicely", ->
   input = """
   ###*
    * Multiline for jsdoc-"@doctags"
-   * 
+   *
    * @type {Function}
   ###
   fn = () -> 1
   """
 
   result = """
-  
+
   /**
    * Multiline for jsdoc-"@doctags"
-   * 
+   *
    * @type {Function}
    */
   var fn;
-  
+
   fn = function() {
     return 1;
   };
-  
+
   """
   eq CoffeeScript.compile(input, bare: on), result
 
@@ -1699,54 +1699,54 @@ test "#3132: Place block-comments nicely", ->
   input = """
   ###*
   # A dummy class definition
-  # 
+  #
   # @class
   ###
   class DummyClass
-    
+
     ###*
     # @constructor
     ###
     constructor: ->
-  
+
     ###*
     # Singleton reference
-    # 
+    #
     # @type {DummyClass}
     ###
     @instance = new DummyClass()
-  
+
   """
 
   result = """
-  
+
   /**
    * A dummy class definition
-   * 
+   *
    * @class
    */
   var DummyClass;
-  
+
   DummyClass = (function() {
-  
+
     /**
      * @constructor
      */
     function DummyClass() {}
-  
-  
+
+
     /**
      * Singleton reference
-     * 
+     *
      * @type {DummyClass}
      */
-  
+
     DummyClass.instance = new DummyClass();
-  
+
     return DummyClass;
-  
+
   })();
-  
+
   """
   eq CoffeeScript.compile(input, bare: on), result
 # Compilation
@@ -1763,7 +1763,7 @@ test "ensure that carriage returns don't break compilation on Windows", ->
 test "#3089 - don't mutate passed in options to compile", ->
   opts = {}
   CoffeeScript.compile '1 + 1', opts
-  ok !opts.scope 
+  ok !opts.scope
 
 test "--bare", ->
   eq -1, CoffeeScript.compile('x = y', bare: on).indexOf 'function'
@@ -4067,7 +4067,7 @@ test "Loose tokens inside of explicit call lists", ->
   foo = second( one
                 2)
   eq foo, 2
-  
+
   bar = first( first
                one: 1)
 
@@ -5532,7 +5532,6 @@ test "chained operations should evaluate each value only once", ->
 
 test "#891: incorrect inversion of chained comparisons", ->
   ok (true unless 0 > 1 > 2)
-  ok (true unless (NaN = 0/0) < 0/0 < NaN)
 
 test "#1234: Applying a splat to :: applies the splat to the wrong object", ->
   nonce = {}
@@ -6010,8 +6009,8 @@ test "#1183: super + fat arrows", ->
   	constructor: ->
   		@_i = 0
   	foo : (cb) ->
-  		dolater => 
-  			@_i += 1 
+  		dolater =>
+  			@_i += 1
   			cb()
 
   class B extends A
@@ -6022,19 +6021,19 @@ test "#1183: super + fat arrows", ->
   			dolater =>
   				@_i += 2
   				super cb
-          
+
   b = new B
   b.foo => eq b._i, 3
 
 test "#1183: super + wrap", ->
   class A
     m : -> 10
-    
+
   class B extends A
     constructor : -> super
-    
+
   B::m = -> r = try super()
-  
+
   eq (new B).m(), 10
 
 test "#1183: super + closures", ->
@@ -6042,7 +6041,7 @@ test "#1183: super + closures", ->
     constructor: ->
       @i = 10
     foo : -> @i
-    
+
   class B extends A
     foo : ->
       ret = switch 1
@@ -6050,15 +6049,15 @@ test "#1183: super + closures", ->
         when 1 then super()
       ret
   eq (new B).foo(), 10
- 
+
 test "#2331: bound super regression", ->
   class A
     @value = 'A'
     method: -> @constructor.value
-    
+
   class B extends A
     method: => super
-  
+
   eq (new B).method(), 'A'
 
 test "#3259: leak with @-params within destructured parameters", ->
@@ -6606,7 +6605,7 @@ test "#3229, multiline strings", ->
     indentation
       doesn\'t
   matter', 'indentation doesn\'t matter'
-  eq 'trailing ws      
+  eq 'trailing ws
     doesn\'t matter', 'trailing ws doesn\'t matter'
 
   # Use backslashes at the end of a line to specify whitespace between lines.
@@ -6618,7 +6617,7 @@ test "#3229, multiline strings", ->
       b\
       c  \
       d", 'a bc  d'
-  eq 'ignore  \  
+  eq 'ignore  \
       trailing whitespace', 'ignore  trailing whitespace'
 
   # Backslash at the beginning of a literal string.
@@ -6669,7 +6668,7 @@ test "#3229, multiline strings", ->
       ok', 'several escaped backslashes\\\\\\ ok'
   eq 'several escaped backslashes slash\\\\\\\
       ok', 'several escaped backslashes slash\\\\\\ok'
-  eq 'several escaped backslashes with trailing ws \\\\\\   
+  eq 'several escaped backslashes with trailing ws \\\\\\
       ok', 'several escaped backslashes with trailing ws \\\\\\ ok'
 
   # Backslashes at beginning of lines.
@@ -6689,13 +6688,13 @@ test "#3249, escape newlines in heredocs with backslashes", ->
   # Ignore escaped newlines
   eq '''
     Set whitespace      \
-       <- this is ignored\  
+       <- this is ignored\
            none
       normal indentation
     ''', 'Set whitespace      <- this is ignorednone\n  normal indentation'
   eq """
     Set whitespace      \
-       <- this is ignored\  
+       <- this is ignored\
            none
       normal indentation
     """, 'Set whitespace      <- this is ignorednone\n  normal indentation'

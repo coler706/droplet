@@ -23,7 +23,11 @@
     "mocha": "^2.2.5",
     "seedrandom": "^2.4.0",
     "tiny-lr": "^0.1.5",
-    "watchify": "^3.2.2"
+    "watchify": "^3.2.2",
+    "ts-loader": "^4.2.0",
+    "typescript": "^2.8.3",
+    "webpack": "^4.6.0",
+    "webpack-cli": "^2.0.15"
   },
   "description": "A text editor in blocks",
   "main": "dist/droplet-full.min.js",

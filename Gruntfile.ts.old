@@ -1,0 +1,267 @@
+let ignoredLanguages;
+import browserify = require('browserify');
+import tsc = require('tsc');
+import watchify = require('watchify');
+import livereload = require('tiny-lr');
+import path = require('path');
+import fs = require('fs');
+
+if (process.env.LANGUAGE) {
+  ignoredLanguages = [`./src/languages/!(${ process.env.LANGUAGE }).ts`];
+}
+
+let serveNoDottedFiles = function (connect, options, middlewares) {
+  // Avoid leaking .git/.svn or other dotted files from test servers.
+  middlewares.unshift(function (req, res, next) {
+    if (req.url.indexOf('/.') < 0) {
+      return next();
+    }
+    res.statusCode = 404;
+    res.setHeader('Content-Type', 'text/html');
+    return res.end(`Cannot GET ${ req.url }`);
+  });
+  return middlewares;
+};
+
+export default function (grunt) {
+  // Assemble a list of files not to try to
+  // do browserify on; these are the ones that contain
+  // require() calls from different modules systems or
+  // are already packaged.
+  let x;
+  let NO_PARSE = [path.resolve('./vendor/coffee-script.js'), path.resolve('./vendor/acorn.js'), path.resolve('./vendor/skulpt.js'), path.resolve('./dist/droplet-full.js')];
+
+  grunt.initConfig({
+    pkg: grunt.file.readJSON('package.json'),
+
+    bowercopy: {
+      options: {
+        clean: true
+      },
+      vendor: {
+        options: {
+          destPrefix: 'vendor'
+        },
+        files: {
+          'ace': 'ace-builds/src-noconflict',
+          'coffee-script.js': 'coffee-script/extras/coffee-script.js',
+          'quadtree.js': 'quadtree/quadtree.js',
+          'qunit.js': 'qunit/qunit/qunit.js',
+          'qunit.css': 'qunit/qunit/qunit.css',
+          'acorn.js': 'acorn/acorn.js',
+          'sax.js': 'sax/lib/sax.js'
+        }
+      }
+    },
+
+    qunit: {
+      options: {
+        timeout: 60000,
+        page: {
+          viewportSize: {
+            width: 1000,
+            height: 1000
+          }
+        }
+      },
+      all: {
+        urls: (() => {
+          let result = [];
+          for (x of Array.from(grunt.file.expand('test/*.html'))) {
+            result.push(`http://localhost:8942/${ x }`);
+          }
+          return result;
+        })()
+      }
+    },
+
+    mochaTest: {
+      test: {
+        src: ['test/src/parserTests.js', 'test/src/modelTests.js'],
+        options: {
+          reporter: 'list',
+          compilers: {
+            'coffee': 'coffee-script/register'
+          },
+          timeout: 20000
+        }
+      }
+    },
+
+    browserify: {
+      build: {
+        files: {
+          'dist/droplet-full.js': ['./src/main.ts']
+        },
+        options: {
+          ignore: ignoredLanguages,
+          transform: ['tsc'],
+          browserifyOptions: {
+            standalone: 'droplet',
+            noParse: NO_PARSE
+          },
+          banner: `\
+/* Droplet.
+ * Copyright (c) <%=grunt.template.today('yyyy')%> Anthony Bau.
+ * MIT License.
+ *
+ * Date: <%=grunt.template.today('yyyy-mm-dd')%>
+ */\
+`
+        }
+      },
+      test: {
+        files: {
+          'test/js/ctest.js': ['test/src/ctest.js'],
+          'test/js/tests.js': ['test/src/tests.js'],
+          'test/js/uitest.js': ['test/src/uitest.js'],
+          'test/js/jstest.js': ['test/src/jstest.js'],
+          'test/js/cstest.js': ['test/src/cstest.js'],
+          'test/js/htmltest.js': ['test/src/htmltest.js']
+        },
+        options: {
+          transform: ['tsc'],
+          browserifyOptions: {
+            noParse: NO_PARSE
+          }
+        }
+      }
+    },
+
+    cssmin: {
+      options: {
+        banner: `\
+/* Droplet. | (c) <%=grunt.template.today('yyyy')%> Anthony Bau. | MIT License.
+ */\
+`
+      },
+      minify: {
+        src: ['css/droplet.css'],
+        dest: 'dist/droplet.min.css',
+        ext: '.min.css'
+      }
+    },
+
+    uglify: {
+      options: {
+        banner: `\
+/* Droplet. | (c) <%=grunt.template.today('yyyy')%> Anthony Bau. | MIT License.
+ */\
+`,
+        sourceMap: true
+      },
+
+      build: {
+        files: {
+          'dist/droplet-full.min.js': ['dist/droplet-full.js']
+        }
+      }
+    },
+
+    connect: {
+      testserver: {
+        options: {
+          hostname: '0.0.0.0',
+          port: 8001,
+          middleware: serveNoDottedFiles
+        }
+      },
+      qunitserver: {
+        options: {
+          hostname: '0.0.0.0',
+          port: 8942,
+          middleware: serveNoDottedFiles
+        }
+      }
+    }
+  });
+
+  grunt.loadNpmTasks('grunt-bowercopy');
+  grunt.loadNpmTasks('grunt-banner');
+  grunt.loadNpmTasks('grunt-contrib-coffee');
+  grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
+  grunt.loadNpmTasks('grunt-contrib-qunit');
+  grunt.loadNpmTasks('grunt-mocha-test');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-browserify');
+
+  grunt.registerTask('default', ['build']);
+
+  grunt.registerTask('build', ['browserify:build']);
+
+  grunt.registerTask('dist', ['build', 'uglify', 'cssmin']);
+
+  grunt.registerTask('buildtests', ['browserify:test']);
+
+  grunt.registerTask('all', ['dist', 'buildtests', 'test']);
+
+  grunt.task.registerTask('test', 'Run unit tests, or just one test.', function (testname) {
+    if (testname) {
+      grunt.config('qunit.all', [`test/${ testname }.html`]);
+    } else {
+      grunt.config('qunit.all', (() => {
+        let result1 = [];
+        for (x of Array.from(grunt.file.expand('test/*.html'))) {
+          result1.push(x);
+        }
+        return result1;
+      })());
+    }
+    grunt.task.run('connect:qunitserver');
+    grunt.task.run('qunit:all');
+    return grunt.task.run('mochaTest');
+  });
+
+  grunt.task.registerTask('watchify', function () {
+    // Prevent the task from terminating
+    this.async();
+
+    let b = browserify({
+      cache: {},
+      packageCache: {},
+      noParse: NO_PARSE,
+      delay: 100,
+      standalone: 'droplet'
+    });
+
+    b.require('./src/main.js');
+    b.transform(tsc);
+
+    let w = watchify(b);
+
+    // Compile once through first
+    let stream = fs.createWriteStream('dist/droplet-full.js');
+    w.bundle().pipe(stream);
+
+    return stream.once('close', function () {
+      console.log('Initial bundle complete.');
+
+      let lrserver = livereload();
+
+      lrserver.listen(35729, () => console.log('Livereload server listening on 35729'));
+
+      return w.on('update', function () {
+        console.log('File changed...');
+        stream = fs.createWriteStream('dist/droplet-full.js');
+        try {
+          w.bundle().pipe(stream);
+          return stream.once('close', function () {
+            console.log('Rebuilt.');
+            return lrserver.changed({
+              body: {
+                files: ['dist/droplet-full.js']
+              }
+            });
+          });
+        } catch (e) {
+          console.log('BUILD FAILED.');
+          return console.log(e.stack);
+        }
+      });
+    });
+  });
+
+  return grunt.registerTask('testserver', ['connect:testserver', 'watchify']);
+};

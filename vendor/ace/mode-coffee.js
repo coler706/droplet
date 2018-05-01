@@ -197,7 +197,7 @@ ace.define("ace/mode/coffee_highlight_rules",["require","exports","module","ace/
         this.normalizeRules();
     }
 
-    exports.CoffeeHighlightRules = CoffeeHighlightRules;
+    exportsHighlightRules = CoffeeHighlightRules;
 });
 
 ace.define("ace/mode/matching_brace_outdent",["require","exports","module","ace/range"], function(require, exports, module) {
@@ -330,7 +330,7 @@ oop.inherits(FoldMode, BaseFoldMode);
 ace.define("ace/mode/coffee",["require","exports","module","ace/mode/coffee_highlight_rules","ace/mode/matching_brace_outdent","ace/mode/folding/coffee","ace/range","ace/mode/text","ace/worker/worker_client","ace/lib/oop"], function(require, exports, module) {
 "use strict";
 
-var Rules = require("./coffee_highlight_rules").CoffeeHighlightRules;
+var Rules = require("./coffee_highlight_rules")HighlightRules;
 var Outdent = require("./matching_brace_outdent").MatchingBraceOutdent;
 var FoldMode = require("./folding/coffee").FoldMode;
 var Range = require("../range").Range;

@@ -84,7 +84,9 @@ NO = -> no
 
 arrayEq = (a, b) ->
   return false if a.length isnt b.length
-  return false if k isnt b[i] for k, i in a
+  for k, i in a
+    if k isnt b[i]
+      return false
   return true
 
 # # View
