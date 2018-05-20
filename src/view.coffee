@@ -35,7 +35,7 @@ DEFAULT_OPTIONS =
   buttonPadding: 6
   minIndentTongueWidth: 150
   showDropdowns: true
-  padding: 5
+  padding: 2
   indentWidth: 20
   indentTongueHeight: 20
   tabOffset: 10
@@ -46,38 +46,38 @@ DEFAULT_OPTIONS =
   indentDropAreaMinWidth: 50
   minSocketWidth: 10
   invisibleSocketWidth: 5
-  textHeight: 15
-  textPadding: 1
+  textHeight: 16
+  textPadding: 2
   emptyLineWidth: 50
   highlightAreaHeight: 10
-  bevelClip: 3
+  bevelClip: 0
   shadowBlur: 5
   colors:
-    error: '#ff0000'
-    comment: '#c0c0c0'  # gray
-    return: '#fff59d'   # yellow
-    control: '#ffcc80'  # orange
-    value: '#a5d6a7'    # green
-    command: '#90caf9'  # blue
-    red: '#ef9a9a'
-    pink: '#f48fb1'
-    purple: '#ce93d8'
-    deeppurple: '#b39ddb'
-    indigo: '#9fa8da'
-    blue: '#90caf9'
+    error: '#f44336'
+    comment: '#9E9E9E'  # gray
+    return: '#FFEB3B'   # yellow
+    control: '#FF9800'  # orange
+    value: '#4CAF50'    # green
+    command: '#2196F3'  # blue
+    red: '#f44336'
+    pink: '#E91E63'
+    purple: '#9C27B0'
+    deeppurple: '#673AB7'
+    indigo: '#3F51B5'
+    blue: '#2196F3'
     lightblue: '#81d4fa'
     cyan: '#80deea'
     teal: '#80cbc4'
-    green: '#a5d6a7'
-    lightgreen: '#c5e1a5'
-    lime: '#e6ee9c'
-    yellow: '#fff59d'
-    amber: '#ffe082'
-    orange: '#ffcc80'
-    deeporange: '#ffab91'
-    brown: '#bcaaa4'
-    grey: '#eeeeee'
-    bluegrey: '#b0bec5'
+    green: '#4CAF50'
+    lightgreen: '#8BC34A'
+    lime: '#CDDC39'
+    yellow: '#FFEB3B'
+    amber: '#FFC107'
+    orange: '#FF9800'
+    deeporange: '#FF5722'
+    brown: '#795548'
+    grey: '#9E9E9E'
+    bluegrey: '#607D8B'
 
 YES = -> yes
 NO = -> no
@@ -1361,7 +1361,8 @@ exports.View = class View
       @group = new @view.draw.Group('droplet-container-group')
 
       if @model.type is 'block'
-        @path = new @view.draw.Path([], true, {
+        #remove bevel
+        @path = new @view.draw.Path([], false, {
           cssClass: 'droplet-block-path'
         })
       else
@@ -1928,11 +1929,10 @@ exports.View = class View
             new @view.draw.Point 0 + @view.opts.buttonWidth, 0
             new @view.draw.Point 0 + @view.opts.buttonWidth, 0 + @view.opts.buttonHeight
             new @view.draw.Point 0, 0 + @view.opts.buttonHeight
-        ], true, {
+        ], false, {
           fillColor: @view.getColor(@model.color)
           cssClass: 'droplet-button-path'
-        })
-
+        },true)
         textElement = new @view.draw.Text(new @view.draw.Point(
           (@view.opts.buttonWidth - @view.draw.measureCtx.measureText('+').width)/ 2,
           @view.opts.buttonHeight - @view.opts.textHeight

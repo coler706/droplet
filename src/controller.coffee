@@ -20,8 +20,8 @@ DEFAULT_INDENT_DEPTH = '  '
 ANIMATION_FRAME_RATE = 60
 DISCOURAGE_DROP_TIMEOUT = 1000
 MAX_DROP_DISTANCE = 100
-CURSOR_WIDTH_DECREASE = 3
-CURSOR_HEIGHT_DECREASE = 2
+CURSOR_WIDTH_DECREASE = 0
+CURSOR_HEIGHT_DECREASE = 0
 CURSOR_UNFOCUSED_OPACITY = 0.5
 DEBUG_FLAG = false
 DROPDOWN_SCROLLBAR_PADDING = 17
@@ -159,8 +159,8 @@ class Session
     @currentlyUsingBlocks = true
 
     # Fonts
-    @fontSize = 15
-    @fontFamily = 'Courier New'
+    @fontSize = 16
+    @fontFamily = 'pixelFont, Courier New'
 
     metrics = helper.fontMetrics(@fontFamily, @fontSize)
     @fontAscent = metrics.prettytop
@@ -240,14 +240,14 @@ exports.Editor = class Editor
     do @draw.refreshFontCapital
 
     @standardViewSettings =
-      padding: 5
+      padding: 6
       indentWidth: 20
-      textHeight: helper.getFontHeight 'Courier New', 15
+      textHeight: helper.getFontHeight 'pixelFont, Courier New', 16
       indentTongueHeight: 20
       tabOffset: 10
-      tabWidth: 15
+      tabWidth: 9
       tabHeight: 4
-      tabSideWidth: 1 / 4
+      tabSideWidth: 0
       dropAreaHeight: 20
       indentDropAreaMinWidth: 50
       emptySocketWidth: 20
@@ -276,7 +276,7 @@ exports.Editor = class Editor
       @aceEditor = ace.edit @aceElement
 
       @aceEditor.setTheme 'ace/theme/chrome'
-      @aceEditor.setFontSize 15
+      @aceEditor.setFontSize 16
       acemode = @options.mode
       if acemode is 'coffeescript' then acemode = 'coffee'
       @aceEditor.getSession().setMode 'ace/mode/' + acemode
@@ -547,7 +547,7 @@ Editor::clearMain = (opts) -> # TODO remove and remove all references to
 Editor::setTopNubbyStyle = (height = 10, color = '#EBEBEB') ->
   @nubbyHeight = Math.max(0, height); @nubbyColor = color
 
-  @topNubbyPath ?= new @draw.Path([], true)
+  @topNubbyPath ?= new @draw.Path([], false)
   @topNubbyPath.activate()
   @topNubbyPath.setParent @mainCanvas
 
@@ -3888,9 +3888,9 @@ hook 'redraw_palette', 0, ->
 # MULTIPLE FONT SIZE SUPPORT
 # ================================
 hook 'populate', 0, ->
-  @session.fontSize = 15
-  @session.fontFamily = 'Courier New'
-  @measureCtx.font = '15px Courier New'
+  @session.fontSize = 16
+  @session.fontFamily = 'pixelFont, Courier New'
+  @measureCtx.font = '16px pixelFont, Courier New'
   @session.fontWidth = @measureCtx.measureText(' ').width
 
   metrics = helper.fontMetrics(@session.fontFamily, @session.fontSize)
@@ -4355,9 +4355,10 @@ hook 'populate', 0, ->
   cursorElement.setAttribute 'stroke', '#000'
   cursorElement.setAttribute 'stroke-width', '3'
   cursorElement.setAttribute 'stroke-linecap', 'round'
-  cursorElement.setAttribute 'd', "M#{@session.view.opts.tabOffset + CURSOR_WIDTH_DECREASE / 2} 0 " +
-      "Q#{@session.view.opts.tabOffset + @session.view.opts.tabWidth / 2} #{@session.view.opts.tabHeight}" +
-      " #{@session.view.opts.tabOffset + @session.view.opts.tabWidth - CURSOR_WIDTH_DECREASE / 2} 0"
+  cursorElement.setAttribute 'd', "M#{@session.view.opts.tabOffset} 0 " +
+      "L#{@session.view.opts.tabOffset + @session.view.opts.tabWidth*@session.view.opts.tabSideWidth} #{@session.view.opts.tabHeight}" +
+      "L#{@session.view.opts.tabOffset + @session.view.opts.tabWidth*(1- @session.view.opts.tabSideWidth)} #{@session.view.opts.tabHeight}" +
+      "L#{@session.view.opts.tabOffset + @session.view.opts.tabWidth} 0"
 
   @cursorPath = new @session.view.draw.ElementWrapper(cursorElement)
   @cursorPath.setParent @mainCanvas

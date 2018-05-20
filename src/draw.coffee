@@ -91,9 +91,9 @@ exports.Draw = class Draw
   constructor: (@ctx) ->
     canvas = document.createElement('canvas')
     @measureCtx = canvas.getContext '2d'
-    @fontSize = 15
-    @fontFamily = 'Courier New, monospace'
-    @fontAscent = -2
+    @fontSize = 16
+    @fontFamily = 'pixelFont, Courier New, monospace'
+    @fontAscent = -3
     @fontBaseline = 10
 
     @measureCtx.font = "#{@fontSize}px #{@fontFamily}"
@@ -187,7 +187,7 @@ exports.Draw = class Draw
     # This is called Path, but is forced to be closed so is actually a polygon.
     # It can do fast translation and rectangular intersection.
     @Path = class Path extends ElementWrapper
-      constructor: (@_points = [], @bevel = false, @style) ->
+      constructor: (@_points = [], @bevel = false, @style ,@makeGroup=false) ->
         @_cachedTranslation = new Point 0, 0
         @_cacheFlag = true
         @_bounds = new NoRectangle()
@@ -484,6 +484,7 @@ exports.Draw = class Draw
         if @bevel
           @backgroundPathElement = pathElement
           @backgroundPathElement.setAttribute 'class', 'droplet-background-path'
+          @backgroundPathElement.setAttribute 'fill', @style.fillColor
           pathElement = document.createElementNS SVG_STANDARD, 'g'
 
           @lightPathElement = document.createElementNS SVG_STANDARD, 'path'
@@ -502,10 +503,30 @@ exports.Draw = class Draw
           pathElement.appendChild @lightPathElement
           pathElement.appendChild @darkPathElement
         else
-          pathElement.setAttribute 'stroke', @style.strokeColor
-          pathElement.setAttribute 'stroke-width', @style.lineWidth
-          if (@style.dotted?.length ? 0) > 0
-            pathElement.setAttribute 'stroke-dasharray', @style.dotted
+          if @makeGroup
+            @backgroundPathElement = pathElement
+            @backgroundPathElement.setAttribute 'class', 'droplet-background-path'
+            @backgroundPathElement.setAttribute 'fill', @style.fillColor
+            pathElement = document.createElementNS SVG_STANDARD, 'g'
+
+            @lightPathElement = document.createElementNS SVG_STANDARD, 'path'
+            @lightPathElement.setAttribute 'fill', avgColor @style.fillColor, 0.7, '#FFF'
+            if pathString.length > 0
+              @lightPathElement.setAttribute 'd', @getLightBevelPath()
+            @lightPathElement.setAttribute 'class', 'droplet-light-bevel-path'
+
+            @darkPathElement = document.createElementNS SVG_STANDARD, 'path'
+            @darkPathElement.setAttribute 'fill', avgColor @style.fillColor, 0.7, '#000'
+            if pathString.length > 0
+              @darkPathElement.setAttribute 'd', @getDarkBevelPath()
+            @darkPathElement.setAttribute 'class', 'droplet-dark-bevel-path'
+
+            pathElement.appendChild @backgroundPathElement
+          else
+            pathElement.setAttribute 'stroke', @style.strokeColor
+            pathElement.setAttribute 'stroke-width', @style.lineWidth
+            if (@style.dotted?.length ? 0) > 0
+              pathElement.setAttribute 'stroke-dasharray', @style.dotted
 
         if @style.cssClass?
           pathElement.setAttribute 'class', @style.cssClass

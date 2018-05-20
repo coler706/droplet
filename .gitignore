@@ -3,7 +3,6 @@ bower_components
 dist
 docs
 js
-example/*.js
 example/*.map
 test/*.js
 test/*.map
